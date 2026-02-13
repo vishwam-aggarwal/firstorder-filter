@@ -3,25 +3,36 @@
 
 #include "Arduino.h"
 
+/**
+ * firstorderFilter
+ *
+ * Implements a first‑order low‑pass filter using the Tustin (bilinear) transform.
+ * Call setup() once, then repeatedly call filteredValue(u) each sample.
+ */
 class firstorderFilter
 {
   public:
-	void setup(float cutOff, float Ts);
+    // Initialize filter with cutoff frequency (rad/s) and sampling time (s)
+    void setup(float cutOff, float Ts);
+
+    // Compute filtered output for current input sample
     float filteredValue(float u);
+
   private:
-   /************************
-   Filter Parameters
-   ************************/
-   float cutOff;
-   float Ts;
-   float _a;
-   float _b;
-   /************************
-   Filter states
-   ************************/
-	float _prev_u;
-	float _prev_y;
-	float _y;
+    /************************
+     * Filter parameters
+     ************************/
+    float cutOff;   // cutoff frequency (rad/s)
+    float Ts;       // sampling time (s)
+    float _a;       // Tustin coefficient
+    float _b;       // Tustin coefficient
+
+    /************************
+     * Filter states
+     ************************/
+    float _prev_u;  // previous input u[k-1]
+    float _prev_y;  // previous output y[k-1]
+    float _y;       // current output y[k]
 };
 
 #endif
