@@ -153,7 +153,7 @@ STM32
 Desktop C++ simulation
 
 ## Example Sketch
-
+```cpp
 #include "TustinPID.h"
 
 TustinPID pid;
@@ -170,7 +170,7 @@ void loop() {
     float u = pid.getControl(e, -100.0f, 100.0f);
     applyActuator(u);
 }
-
+```
 ## References
 
 Bilinear (Tustin) Transformhttps://en.wikipedia.org/wiki/Bilinear_transform
