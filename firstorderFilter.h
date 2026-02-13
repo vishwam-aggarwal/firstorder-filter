@@ -1,8 +1,6 @@
 #ifndef firstorderFilter_h
 #define firstorderFilter_h
 
-#include "Arduino.h"
-
 /**
  * firstorderFilter
  *
