@@ -1,117 +1,180 @@
 /**
-
 @file README.md
+@brief Discrete‑time PID controller using the Tustin (bilinear) transform.
 
-@brief First‑order low‑pass IIR filter using the bilinear (Tustin) transform.
+This library implements a lightweight, real‑time‑safe PID controller using
+the Tustin (bilinear) transform for both the integrator and the derivative
+filter. It is designed for embedded control applications such as motor
+control, robotics, and real‑time feedback loops.
 
+The controller uses:
 
+- Tustin (trapezoidal) integrator
+- Tustin filtered differentiator
+- Integrator freeze anti‑windup when output saturates
+- Deterministic, allocation‑free state updates
 
-This library implements a lightweight, real‑time‑safe first‑order low‑pass filter.
+Although originally written for Arduino, the implementation is fully
+portable to any C++ environment.
+*/
 
-It was written for Arduino but is fully portable to any C++ environment.
+# TustinPID — Discrete‑Time PID Controller (Tustin/Bilinear)
 
+## @brief Overview
 
+A minimal, stable, embedded‑friendly PID controller implemented using the
+**Tustin (bilinear) transform**. The controller computes proportional,
+integral, and derivative terms using numerically robust discrete‑time
+formulas suitable for real‑time systems.
 
-The continuous‑time transfer function is:
+The discrete‑time control law is:
 
- H(s) = ω_c / (s + ω_c)
-
-
-
-Using the bilinear (Tustin) transform, the discrete‑time update becomes:
-
-
-
- y[k] = a (u[k] + u[k‑1]) − b y[k‑1]
-
-
+\[
+u[k] = K_p e[k] + I[k] + D[k]
+\]
 
 with:
 
+### Tustin Integrator
+\[
+I[k] = I[k-1] + \frac{K_i T_s}{2}(e[k] + e[k-1])
+\]
 
+### Tustin Filtered Derivative
+\[
+D[k] = a D[k-1] + b (e[k] - e[k-1])
+\]
 
- a = (Ts * ω_c) / (Ts * ω_c + 2)
+where:
 
- b = (Ts * ω_c − 2) / (Ts * ω_c + 2)
+\[
+a = \frac{2\tau - T_s}{2\tau + T_s}, \quad
+b = \frac{2K_d}{2\tau + T_s}
+\]
 
+### Anti‑Windup (Integrator Freeze)
+When the output saturates, the integrator is **frozen**, preventing
+windup. The `getI()` method always returns the *actual* integrator
+contribution used in the last control output.
 
+---
 
-The class stores previous input/output internally and performs only a few
+## @section features Features
 
-floating‑point operations per sample, making it ideal for embedded control,
+- Discrete‑time PID using Tustin (bilinear) transform  
+- Tustin filtered derivative for noise‑robust differentiation  
+- Integrator freeze anti‑windup  
+- Deterministic, allocation‑free implementation  
+- No dynamic memory  
+- Stable for all valid gains and sampling times  
+- Portable to any C++ project (Arduino not required)  
+- Suitable for motor control, robotics, and real‑time embedded systems  
 
-robotics, and sensor smoothing. */
+---
 
-firstorderFilter — First‑Order Low‑Pass Filter (Tustin/Bilinear)
+## @section usage Usage
 
-@brief Overview
+### Include the library
 
-A minimal, stable, first‑order low‑pass IIR filter implemented using the bilinear (Tustin) transform. Designed for Arduino but fully portable to standard C++.
+```cpp
+#include "TustinPID.h"
 
-The filter computes:
+Create and initialize the controller
 
-y[k] = a (u[k] + u[k‑1]) − b y[k‑1]
+TustinPID pid;
 
-where a and b are derived from the cutoff frequency (rad/s) and sampling time (s).
+float Kp  = 7.58;
+float Ki  = 82.79;
+float Kd  = 0.155;
+float tau = 0.005;   // derivative filter time constant (s)
+float Ts  = 0.01;    // sampling time (s)
 
-@section features Features
+pid.setup(Kp, Ki, Kd, tau, Ts);
 
-First‑order low‑pass IIR filter
+Compute control output each loop
 
-Bilinear (Tustin) discretization
+float error = reference - measurement;
 
-No dynamic memory allocation
+// With saturation limits
+float u = pid.getControl(error, -100.0f, 100.0f);
 
-Stable for all valid cutoff frequencies and sampling times
+// Or without saturation
+float u = pid.getControl(error);
 
-Guard against invalid parameters (Ts <= 0 or cutOff <= 0)
+Access the integrator contribution
 
-Suitable for embedded control, robotics, and sensor smoothing
-
-Portable to any C++ project (Arduino not required)
-
-@section usage Usage
-
-Include the library
-
-#include "firstorderFilter.h"
-
-Create and initialize the filter
-
-firstorderFilter lp;
-
-float cutoff_rad = 20.0;   // cutoff frequency in rad/sfloat Ts = 0.001;          // sampling time in seconds
-
-lp.setup(cutoff_rad, Ts);
-
-Filter your signal each loop
-
-float filtered = lp.filteredValue(raw_signal);
+float Iterm = pid.getI();   // returns the value actually used
 
 @section params Parameter Notes
 
-cutOff is in radians per secondConvert from Hz: cutOff = 2 * PI * f_hz
+Kp, Ki, Kd are standard PID gains
 
-Ts is in secondsExample: 1 kHz loop → Ts = 0.001
+tau is the derivative filter time constant (seconds)
+
+Ts is the sampling time (seconds)
+
+The derivative filter behaves as a first‑order low‑pass
+
+The integrator uses the trapezoidal (Tustin) rule
 
 @section numeric Numerical Notes
 
-Tustin discretization preserves stability for all valid parameters.
+Tustin discretization preserves stability for all valid parameters
 
-Very low cutoff frequencies relative to the sampling rate produce slow, integrator‑like behavior (expected for first‑order LPFs).
+The derivative filter reduces noise amplification
 
-If Ts <= 0 or cutOff <= 0, initialization is ignored to prevent invalid coefficients.
+Integrator freeze prevents windup when output saturates
+
+If Ts <= 0, the controller ignores updates to prevent invalid math
 
 @section portability Portability
 
-Although written for Arduino, the class uses only basic C++ features. To use it outside Arduino:
+Although originally written for Arduino, the class uses only standard C++ features. To use it outside Arduino:
 
-Replace #include "Arduino.h" with standard headers (<cmath>, <stdint.h>, etc.)
+Include <cmath> instead of Arduino.h
 
-No other changes are required.
+No other changes are required
+
+The library is compatible with:
+
+Arduino AVR / SAMD / Mega
+
+ESP32
+
+Teensy
+
+STM32
+
+Desktop C++ simulation
+
+@section example Example Sketch
+
+#include "TustinPID.h"
+
+TustinPID pid;
+
+void setup() {
+    pid.setup(7.58, 82.79, 0.155, 0.005, 0.01);
+}
+
+void loop() {
+    float ref = 1.0f;
+    float y   = readSensor();
+    float e   = ref - y;
+
+    float u = pid.getControl(e, -100.0f, 100.0f);
+    applyActuator(u);
+}
 
 @section refs References
 
-Bilinear Transform (Tustin):https://en.wikipedia.org/wiki/Bilinear_transform
+Bilinear (Tustin) Transformhttps://en.wikipedia.org/wiki/Bilinear_transform
 
-Example derivation of discrete‑time filters:https://spinlab.wpi.edu/courses/ece503_2014/10-3bilinear_transform.pdf
+Discrete‑time filter derivationshttps://spinlab.wpi.edu/courses/ece503_2014/10-3bilinear_transform.pdf
+
+License
+
+MIT License. See LICENSE for details.
+
+
+---
