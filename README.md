@@ -27,7 +27,7 @@ A minimal, stable, embedded‑friendly PID controller implemented using the
 integral, and derivative terms using numerically robust discrete‑time
 formulas suitable for real‑time systems.
 
-The discrete‑time control law is:
+### The discrete‑time control law is:
 
 \[
 u[k] = K_p e[k] + I[k] + D[k]
@@ -78,9 +78,11 @@ contribution used in the last control output.
 
 ```cpp
 #include "TustinPID.h"
+```
 
-Create and initialize the controller
+### Create and initialize the controller
 
+```cpp
 TustinPID pid;
 
 float Kp  = 7.58;
@@ -100,12 +102,15 @@ float u = pid.getControl(error, -100.0f, 100.0f);
 
 // Or without saturation
 float u = pid.getControl(error);
+```
 
-Access the integrator contribution
+### Access the integrator contribution
 
+```cpp
 float Iterm = pid.getI();   // returns the value actually used
+```
 
-@section params Parameter Notes
+## @section params Parameter Notes
 
 Kp, Ki, Kd are standard PID gains
 
@@ -127,11 +132,11 @@ Integrator freeze prevents windup when output saturates
 
 If Ts <= 0, the controller ignores updates to prevent invalid math
 
-@section portability Portability
+## @section portability Portability
 
 Although originally written for Arduino, the class uses only standard C++ features. To use it outside Arduino:
 
-Include <cmath> instead of Arduino.h
+```Include <cmath>``` instead of ```Arduino.h```
 
 No other changes are required
 
@@ -147,7 +152,7 @@ STM32
 
 Desktop C++ simulation
 
-@section example Example Sketch
+## @section example Example Sketch
 
 #include "TustinPID.h"
 
@@ -166,7 +171,7 @@ void loop() {
     applyActuator(u);
 }
 
-@section refs References
+## @section refs References
 
 Bilinear (Tustin) Transformhttps://en.wikipedia.org/wiki/Bilinear_transform
 
@@ -175,6 +180,3 @@ Discrete‑time filter derivationshttps://spinlab.wpi.edu/courses/ece503_2014/10
 License
 
 MIT License. See LICENSE for details.
-
-
----
