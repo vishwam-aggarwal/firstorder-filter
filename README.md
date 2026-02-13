@@ -20,7 +20,7 @@ portable to any C++ environment.
 
 # TustinPID — Discrete‑Time PID Controller (Tustin/Bilinear)
 
-## @brief Overview
+## Overview
 
 A minimal, stable, embedded‑friendly PID controller implemented using the
 **Tustin (bilinear) transform**. The controller computes proportional,
@@ -59,7 +59,7 @@ contribution used in the last control output.
 
 ---
 
-## @section features Features
+## Features
 
 - Discrete‑time PID using Tustin (bilinear) transform  
 - Tustin filtered derivative for noise‑robust differentiation  
@@ -72,7 +72,7 @@ contribution used in the last control output.
 
 ---
 
-## @section usage Usage
+## Usage
 
 ### Include the library
 
@@ -110,7 +110,7 @@ float u = pid.getControl(error);
 float Iterm = pid.getI();   // returns the value actually used
 ```
 
-## @section params Parameter Notes
+## Parameter Notes
 
 Kp, Ki, Kd are standard PID gains
 
@@ -132,7 +132,7 @@ Integrator freeze prevents windup when output saturates
 
 If Ts <= 0, the controller ignores updates to prevent invalid math
 
-## @section portability Portability
+## Portability
 
 Although originally written for Arduino, the class uses only standard C++ features. To use it outside Arduino:
 
@@ -152,7 +152,7 @@ STM32
 
 Desktop C++ simulation
 
-## @section example Example Sketch
+## Example Sketch
 
 #include "TustinPID.h"
 
@@ -171,7 +171,7 @@ void loop() {
     applyActuator(u);
 }
 
-## @section refs References
+## References
 
 Bilinear (Tustin) Transformhttps://en.wikipedia.org/wiki/Bilinear_transform
 
